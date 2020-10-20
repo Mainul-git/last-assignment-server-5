@@ -18,12 +18,14 @@ var MongoClient = require('mongodb').MongoClient;
 
 
 var uri = `mongodb://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0-shard-00-00.wwsul.mongodb.net:27017,cluster0-shard-00-01.wwsul.mongodb.net:27017,cluster0-shard-00-02.wwsul.mongodb.net:27017/${process.env.DB_NAME}?ssl=true&replicaSet=atlas-kv6gzo-shard-0&authSource=admin&retryWrites=true&w=majority`;
-
-MongoClient.connect(uri, function(err, client) {
+const client = new MongoClient(uri, { useNewUrlParser: true,useUnifiedTopology: true });
+client.connect(err => {
+// MongoClient.connect(uri, function(err, client) {
   const collection = client.db("creative").collection("service");
   
   const collectionReview = client.db("creative").collection("review")
   const userDetail = client.db("creative").collection("details")
+  const collectionMyReview = client.db("creative").collection("myReview")
   // perform actions on the collection object
   // app.post('/service',(req,res)=>{
   //   const newService=req.body
@@ -59,11 +61,26 @@ MongoClient.connect(uri, function(err, client) {
       res.send(documents)
     })
   })
+  app.post('/addReview',(req,res)=>{
+    const giveReview=req.body
+    collectionMyReview.insertOne(giveReview)
+    .then(result=>{
+      res.send(result.insertedCount>0)
+    })
+    console.log()
+  })
+
+  app.get('/getReviewInfo',(req,res)=>{
+    collectionMyReview.find({})
+    .toArray((err,documents)=>{
+      res.send(documents)
+    })
+  })
 
 });
 
 
-
+ // "start-dev": "nodemon index.js",
 
 
 
